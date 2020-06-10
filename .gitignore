@@ -1,3 +1,4 @@
+*.npy
 *.txt
 data/
 .vscode/
