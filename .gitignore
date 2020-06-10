@@ -1,0 +1,6 @@
+.vscode/
+__MACOSX/
+__pycache__/
+envr/
+model.zip
+package_models/
