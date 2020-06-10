@@ -1,3 +1,5 @@
+*.txt
+data/
 .vscode/
 __MACOSX/
 __pycache__/

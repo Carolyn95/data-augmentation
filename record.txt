@@ -1,18 +1,15 @@
 # install packages first
-pip install torch torchvision transformers rasa==1.7.0 input_reader ipywidgets
+`pip install torch torchvision transformers rasa==1.7.0 input_reader ipywidgets`
 ERROR: gym 0.17.2 has requirement cloudpickle<1.4.0,>=1.2.0, but you'll have cloudpickle 1.4.1 which is incompatible.
 ERROR: rasa 1.7.0 has requirement packaging~=19.0, but you'll have packaging 20.4 which is incompatible.
 
 # gitignore
+.vscode/
+__MACOSX/
+__pycache__/
+envr/
+model.zip
+package_models/
 
-        .vscode/
-        __MACOSX/
-        __pycache__/
-        augments.py
-        downloads.py
-        envr/
-        model.py
-        model.zip
-        package_models/
-        record.txt
-        test.py
+# save output
+`python myscript > output.txt`
