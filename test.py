@@ -1,3 +1,5 @@
+
+"""
 from transformers import GPT2Config, OpenAIGPTConfig
 import pdb
 
@@ -25,3 +27,4 @@ ALL_MODELS = tuple(GPT2_PRETRAINED_CONFIG_ARCHIVE_MAP.keys())
 # for conf in (GPT2Config, OpenAIGPTConfig):
 #   pdb.set_trace()
 #   print(type(conf))
+"""
