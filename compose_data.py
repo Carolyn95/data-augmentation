@@ -33,10 +33,10 @@ def composeData(org_sents, sents, org_labels, labels, *args):
     if len(args) == 2:
       if isinstance(args[0][0], str):
         new_sents = np.append(new_sents, args[0])
-        new_labels = np.append(new_labels, args[1])
+        new_labels = np.append(new_labels, args[1], axis=0)
       else:
         new_sents = np.append(new_sents, args[1])
-        new_labels = np.append(new_labels, args[0])
+        new_labels = np.append(new_labels, args[0], axis=0)
     else:
       print('expected flexible args as a pair')
       raise AttributeError

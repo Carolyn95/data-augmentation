@@ -1,0 +1,16 @@
+ ### 0.7718926553672316
+ def createModel(self):
+    input_text = Input(shape=(1,), dtype='string')
+    embedding = Lambda(self.use_embedding, output_shape=(512,))(input_text)
+    dense = Dense(512, activation='relu')(
+        embedding)  #kernel_regularizer=l1(0.0001) #
+    dense = Dense(512, activation='tanh')(dense)
+    dense = Dense(512, activation='tanh')(dense)
+    dense = Dense(512, activation='tanh')(dense)
+    dense = Dropout(0.4)(dense)
+    pred = Dense(self.n_labels, activation='softmax')(dense)
+    self.model = Model(inputs=[input_text], outputs=pred)
+    self.model.compile(loss='categorical_crossentropy',
+                       optimizer='adam',
+                       metrics=['accuracy'])
+    print(self.model.summary())
