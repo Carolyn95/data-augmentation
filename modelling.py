@@ -12,15 +12,15 @@ import numpy as np
 import pickle as pkl
 import tensorflow as tf
 # from tensorflow.python import keras as keras
-import keras.backend as K
+import tensorflow.keras.backend as K
 import tensorflow_hub as hub
-from keras.models import Model
-from keras.regularizers import l1
+from tensorflow.keras.models import Model
+from tensorflow.keras.regularizers import l1
 # from tensorflow.keras.layers import LayerNormalization
 # import tensorflow.python.keras as keras
-from keras.layers import Input, Lambda, Dense, Dropout, Reshape, BatchNormalization, ReLU, LayerNormalization
-from keras.callbacks import ModelCheckpoint, TensorBoard
-from keras.optimizers import Adam
+from tensorflow.keras.layers import Input, Lambda, Dense, Dropout, Reshape, BatchNormalization, ReLU, LayerNormalization
+from tensorflow.keras.callbacks import ModelCheckpoint, TensorBoard
+from tensorflow.keras.optimizers import Adam
 import sklearn
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import precision_recall_fscore_support

@@ -27,7 +27,7 @@
                        metrics=['accuracy'])
     print(self.model.summary()) 
 
-### 
+### 0.786723163841808
   def createModel(self):
     input_text = Input(shape=(1,), dtype='string')
     embedding = Lambda(self.use_embedding, output_shape=(512,))(input_text)
