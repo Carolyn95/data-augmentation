@@ -41,3 +41,90 @@
                        optimizer='adam',
                        metrics=['accuracy'])
     print(self.model.summary())     
+
+4 ### 0.7281073446327684 
+# https://github.com/mhmoodlan/cyclic-learning-rate   
+
+  def createModel(self):
+    input_text = Input(shape=(1,), dtype='string')
+    embedding = Lambda(self.use_embedding, output_shape=(512,))(input_text)
+    dense = Dense(512, activation='relu')(
+        embedding)  #kernel_regularizer=l1(0.0001) #
+    dense = Dropout(0.4)(dense)
+    pred = Dense(self.n_labels, activation='softmax')(dense)
+    self.model = Model(inputs=[input_text], outputs=pred)
+
+    self.model.compile(loss='categorical_crossentropy',
+                       optimizer=tf.keras.optimizers.Adam(
+                           learning_rate=clr.cyclic_learning_rate(
+                               global_step=0, mode='triangular2')),
+                       metrics=['accuracy'])
+    print(self.model.summary())
+
+
+# https://github.com/bckenstler/CLR
+4 ### 0.6970338983050848 
+
+      clr = CyclicLR(base_lr=0.001, max_lr=0.006,
+                     step_size=100.)  # 2-10 times of iterations (50)
+      hist = self.model.fit(self.train_x,
+                            self.train_y,
+                            validation_split=0.2,
+                            epochs=20,
+                            batch_size=128,
+                            callbacks=[ckpt, clr])
+
+
+
+              precision    recall  f1-score   support
+
+      unknow       0.00      0.00      0.00       109
+      update       0.70      0.99      0.82       980
+         new       0.71      0.04      0.07       327
+
+    accuracy                           0.70      1416
+   macro avg       0.47      0.34      0.30      1416
+weighted avg       0.65      0.70      0.58      1416
+[[  0 109   0]
+ [  0 975   5]
+ [  0 315  12]]
+ 448.1Mb ~ 2643.9Mb
+ Overall Time:  173.74821829795837 s
+Epoch 1/20
+5248/5296 [============================>.] - ETA: 0s - loss: 0.6173 - acc: 0.5978 
+Epoch 00001: val_loss improved from inf to 0.50132, saving model to serial-no/4/01.hdf5
+5296/5296 [==============================] - 11s 2ms/sample - loss: 0.6158 - acc: 0.5989 - val_loss: 0.5013 - val_acc: 0.6242
+
+# https://github.com/bckenstler/CLR
+4 ### 0.7153954802259888 
+      clr = CyclicLR(base_lr=0.001,
+                     max_lr=0.006,
+                     step_size=100.,
+                     mode='triangular2')  # 2-10 times of iterations (50)
+      hist = self.model.fit(self.train_x,
+                            self.train_y,
+                            validation_split=0.2,
+                            epochs=20,
+                            batch_size=128,
+                            callbacks=[ckpt, clr])
+              precision    recall  f1-score   support
+
+      unknow       0.00      0.00      0.00       109
+      update       0.87      0.81      0.84       980
+         new       0.44      0.69      0.53       327
+
+    accuracy                           0.72      1416
+   macro avg       0.44      0.50      0.46      1416
+weighted avg       0.71      0.72      0.70      1416
+[[  0  10  99]
+ [  0 789 191]
+ [  0 103 224]]
+448.4 MiB~2642.4 MiB
+Overall Time:  173.64059925079346 s
+Epoch 1/20
+5248/5296 [============================>.] - ETA: 0s - loss: 0.6101 - acc: 0.5968 
+Epoch 00001: val_loss improved from inf to 0.48057, saving model to serial-no/4/01.hdf5
+5296/5296 [==============================] - 11s 2ms/sample - loss: 0.6089 - acc: 0.5984 - val_loss: 0.4806 - val_acc: 0.6415
+
+
+

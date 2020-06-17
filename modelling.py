@@ -30,6 +30,7 @@ from rich import print
 import pdb
 from matplotlib import pyplot as plt
 import numpy as np
+from clr_callback import CyclicLR
 # import tensorflow_addons as tfa
 # from tensorflow_addons.optimizers import CyclicalLearningRate
 
@@ -90,17 +91,9 @@ class VanillaUSE():
     dense = Dropout(0.4)(dense)
     pred = Dense(self.n_labels, activation='softmax')(dense)
     self.model = Model(inputs=[input_text], outputs=pred)
-    lr_schedule = tf.keras.optimizers.schedules.CyclicalLearningRate(
-        initial_learning_rate=1e-4,
-        maximal_learning_rate=1e-2,
-        step_size=2000,
-        scale_fn=lambda x: 1.,
-        scale_mode="cycle",
-        name="ExampleCyclicScheduler")
-    self.model.compile(
-        loss='categorical_crossentropy',
-        optimizer=tf.keras.optimizers.Adam(learning_rate=lr_schedule),
-        metrics=['accuracy'])
+    self.model.compile(loss='categorical_crossentropy',
+                       optimizer="adam",
+                       metrics=['accuracy'])
     print(self.model.summary())
 
   def createModelBN(self):
@@ -139,12 +132,17 @@ class VanillaUSE():
                              verbose=1,
                              save_best_only=True,
                              mode='auto')
+      clr = CyclicLR(base_lr=0.001,
+                     max_lr=0.006,
+                     step_size=100.,
+                     mode='exp_range',
+                     gamma=0.99994)  # 2-10 times of iterations (50)
       hist = self.model.fit(self.train_x,
                             self.train_y,
                             validation_split=0.2,
                             epochs=20,
                             batch_size=128,
-                            callbacks=[ckpt])
+                            callbacks=[ckpt, clr])
       pred = self.model.predict(self.valid_x)
       self.pred = np.argmax(pred, axis=1)
       self.valid_y_ = np.argmax(self.valid_y, axis=1)
