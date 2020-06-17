@@ -32,7 +32,7 @@
     input_text = Input(shape=(1,), dtype='string')
     embedding = Lambda(self.use_embedding, output_shape=(512,))(input_text)
     dense = Dense(512)(embedding)  #kernel_regularizer=l1(0.0001) #
-    dense = LayerNormalization()(dense)
+    dense = LayerNormalization(axis=-1)(dense)
     dense = ReLU()(dense)
     dense = Dropout(0.4)(dense)
     pred = Dense(self.n_labels, activation='softmax')(dense)
@@ -40,4 +40,4 @@
     self.model.compile(loss='categorical_crossentropy',
                        optimizer='adam',
                        metrics=['accuracy'])
-    print(self.model.summary())       
+    print(self.model.summary())     

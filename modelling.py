@@ -11,13 +11,10 @@ import pdb
 import numpy as np
 import pickle as pkl
 import tensorflow as tf
-# from tensorflow.python import keras as keras
 import tensorflow.keras.backend as K
 import tensorflow_hub as hub
 from tensorflow.keras.models import Model
 from tensorflow.keras.regularizers import l1
-# from tensorflow.keras.layers import LayerNormalization
-# import tensorflow.python.keras as keras
 from tensorflow.keras.layers import Input, Lambda, Dense, Dropout, Reshape, BatchNormalization, ReLU, LayerNormalization
 from tensorflow.keras.callbacks import ModelCheckpoint, TensorBoard
 from tensorflow.keras.optimizers import Adam
@@ -33,6 +30,8 @@ from rich import print
 import pdb
 from matplotlib import pyplot as plt
 import numpy as np
+# import tensorflow_addons as tfa
+# from tensorflow_addons.optimizers import CyclicalLearningRate
 
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # remove logging info
@@ -86,15 +85,22 @@ class VanillaUSE():
   def createModel(self):
     input_text = Input(shape=(1,), dtype='string')
     embedding = Lambda(self.use_embedding, output_shape=(512,))(input_text)
-    dense = Dense(512)(embedding)  #kernel_regularizer=l1(0.0001) #
-    dense = LayerNormalization(axis=-1)(dense)
-    dense = ReLU()(dense)
+    dense = Dense(512, activation='relu')(
+        embedding)  #kernel_regularizer=l1(0.0001) #
     dense = Dropout(0.4)(dense)
     pred = Dense(self.n_labels, activation='softmax')(dense)
     self.model = Model(inputs=[input_text], outputs=pred)
-    self.model.compile(loss='categorical_crossentropy',
-                       optimizer='adam',
-                       metrics=['accuracy'])
+    lr_schedule = tf.keras.optimizers.schedules.CyclicalLearningRate(
+        initial_learning_rate=1e-4,
+        maximal_learning_rate=1e-2,
+        step_size=2000,
+        scale_fn=lambda x: 1.,
+        scale_mode="cycle",
+        name="ExampleCyclicScheduler")
+    self.model.compile(
+        loss='categorical_crossentropy',
+        optimizer=tf.keras.optimizers.Adam(learning_rate=lr_schedule),
+        metrics=['accuracy'])
     print(self.model.summary())
 
   def createModelBN(self):
@@ -181,8 +187,8 @@ if __name__ == '__main__':
   vu = VanillaUSE(dr.train_sents, dr.train_labels, dr.valid_sents,
                   dr.valid_labels)
   vu.createModel()
-  vu.train(filepath='serial-no/3')
-  vu.consolidateResult(filepath='serial-no/3')
+  vu.train(filepath='serial-no/4')
+  vu.consolidateResult(filepath='serial-no/4')
   # vu.createModelBN()
   # vu.train(filepath='Vanilla_USE_BN')
   # vu.consolidateResult(filepath='Vanilla_USE_BN')
