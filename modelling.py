@@ -11,11 +11,14 @@ import pdb
 import numpy as np
 import pickle as pkl
 import tensorflow as tf
+# from tensorflow.python import keras as keras
 import keras.backend as K
 import tensorflow_hub as hub
 from keras.models import Model
 from keras.regularizers import l1
-from keras.layers import Input, Lambda, Dense, Dropout, Reshape, BatchNormalization
+# from tensorflow.keras.layers import LayerNormalization
+# import tensorflow.python.keras as keras
+from keras.layers import Input, Lambda, Dense, Dropout, Reshape, BatchNormalization, ReLU, LayerNormalization
 from keras.callbacks import ModelCheckpoint, TensorBoard
 from keras.optimizers import Adam
 import sklearn
@@ -83,10 +86,9 @@ class VanillaUSE():
   def createModel(self):
     input_text = Input(shape=(1,), dtype='string')
     embedding = Lambda(self.use_embedding, output_shape=(512,))(input_text)
-    dense = Dense(512, activation='relu')(
-        embedding)  #kernel_regularizer=l1(0.0001) #
-    dense = Dense(512, activation='tanh')(dense)
-    dense = Dense(256, activation='relu')(dense)
+    dense = Dense(512)(embedding)  #kernel_regularizer=l1(0.0001) #
+    dense = LayerNormalization(axis=-1)(dense)
+    dense = ReLU()(dense)
     dense = Dropout(0.4)(dense)
     pred = Dense(self.n_labels, activation='softmax')(dense)
     self.model = Model(inputs=[input_text], outputs=pred)
@@ -149,6 +151,7 @@ class VanillaUSE():
         classification_report(self.valid_y_,
                               self.pred,
                               target_names=target_names))
+    print(confusion_matrix(self.valid_y_, self.pred))
 
   def consolidateResult(self, filepath):
     import pandas as pd
@@ -163,10 +166,10 @@ if __name__ == '__main__':
   start_time = time.time()
   # input data: "processed_data/randomized_sents_1k.npy" | "processed_data/randomized_sents_2k.npy"
   # input label: "processed_data/randomized_labels_1k.npy" | "processed_data/randomized_labels_2k.npy"
-  # train_sents_path = 'processed_data/randomized_sents_1k.npy'
-  # train_labels_path = 'processed_data/randomized_labels_1k.npy'
-  train_sents_path = 'processed_data/randomized_sents_2k.npy'
-  train_labels_path = 'processed_data/randomized_labels_2k.npy'
+  train_sents_path = 'processed_data/randomized_sents_1k.npy'
+  train_labels_path = 'processed_data/randomized_labels_1k.npy'
+  # train_sents_path = 'processed_data/randomized_sents_2k.npy'
+  # train_labels_path = 'processed_data/randomized_labels_2k.npy'
   valid_sents_path = 'data/valid_sents_mixed.npy'
   valid_labels_path = 'data/valid_labels_onehot_mixed.npy'
   dr = DataReader(train_sents_path, train_labels_path, valid_sents_path,
@@ -178,8 +181,8 @@ if __name__ == '__main__':
   vu = VanillaUSE(dr.train_sents, dr.train_labels, dr.valid_sents,
                   dr.valid_labels)
   vu.createModel()
-  vu.train(filepath='serial-no/20')
-  vu.consolidateResult(filepath='serial-no/20')
+  vu.train(filepath='serial-no/3')
+  vu.consolidateResult(filepath='serial-no/3')
   # vu.createModelBN()
   # vu.train(filepath='Vanilla_USE_BN')
   # vu.consolidateResult(filepath='Vanilla_USE_BN')
