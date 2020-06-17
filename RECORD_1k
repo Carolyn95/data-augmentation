@@ -61,6 +61,173 @@
                        metrics=['accuracy'])
     print(self.model.summary())
 
+4 ### 0.692090395480226 
+# https://github.com/mhmoodlan/cyclic-learning-rate 
+  def createModel(self):
+    input_text = Input(shape=(1,), dtype='string')
+    embedding = Lambda(self.use_embedding, output_shape=(512,))(input_text)
+    dense = Dense(512, activation='relu')(
+        embedding)  #kernel_regularizer=l1(0.0001) #
+    dense = Dropout(0.4)(dense)
+    pred = Dense(self.n_labels, activation='softmax')(dense)
+    self.model = Model(inputs=[input_text], outputs=pred)
+    # {triangular, triangular2, exp_range}
+    self.model.compile(
+        loss='categorical_crossentropy',
+        optimizer=tf.keras.optimizers.Adam(
+            learning_rate=clr.cyclic_learning_rate(global_step=0,
+                                                   learning_rate=0.001,
+                                                   max_lr=0.1,
+                                                   step_size=20.,
+                                                   gamma=0.99994,
+                                                   mode='triangular2')),
+        metrics=['accuracy'])
+    print(self.model.summary())
+
+              precision    recall  f1-score   support
+
+      unknow       0.00      0.00      0.00       109
+      update       0.69      1.00      0.82       980
+         new       0.50      0.00      0.01       327
+
+    accuracy                           0.69      1416
+   macro avg       0.40      0.33      0.27      1416
+weighted avg       0.59      0.69      0.57      1416
+[[  0 109   0]
+ [  0 979   1]
+ [  0 326   1]]
+448.4 MiB~2651.1 MiB
+Epoch 4/20
+5248/5296 [============================>.] - ETA: 0s - loss: 0.5829 - acc: 0.6404
+Epoch 00004: val_loss improved from 0.45561 to 0.44260, saving model to serial-no/4/04.hdf5
+5296/5296 [==============================] - 8s 1ms/sample - loss: 0.5856 - acc: 0.6401 - val_loss: 0.4426 - val_acc: 0.6657
+Overall Time:  163.27553701400757 s
+
+
+4 ### 0.7627118644067796
+# https://github.com/mhmoodlan/cyclic-learning-rate 
+  def createModel(self):
+    input_text = Input(shape=(1,), dtype='string')
+    embedding = Lambda(self.use_embedding, output_shape=(512,))(input_text)
+    dense = Dense(512, activation='relu')(
+        embedding)  #kernel_regularizer=l1(0.0001) #
+    dense = Dropout(0.4)(dense)
+    pred = Dense(self.n_labels, activation='softmax')(dense)
+    self.model = Model(inputs=[input_text], outputs=pred)
+    # {triangular, triangular2, exp_range}
+    self.model.compile(
+        loss='categorical_crossentropy',
+        optimizer=tf.keras.optimizers.Adam(
+            learning_rate=clr.cyclic_learning_rate(global_step=0,
+                                                   learning_rate=0.001,
+                                                   max_lr=0.1,
+                                                   step_size=20.,
+                                                   gamma=0.9994,
+                                                   mode='triangular2')),
+        metrics=['accuracy'])
+    print(self.model.summary())
+              precision    recall  f1-score   support
+
+      unknow       0.82      0.39      0.53       109
+      update       0.83      0.88      0.86       980
+         new       0.53      0.54      0.54       327
+
+    accuracy                           0.76      1416
+   macro avg       0.73      0.60      0.64      1416
+weighted avg       0.76      0.76      0.76      1416
+[[ 42  21  46]
+ [  9 860 111]
+ [  0 149 178]]
+ 448.4 MiB ~ 2641.9 MiB
+Overall Time:  163.27564692497253 s
+Epoch 1/20
+5248/5296 [============================>.] - ETA: 0s - loss: 0.6499 - acc: 0.5800 
+Epoch 00001: val_loss improved from inf to 0.51225, saving model to serial-no/4/01.hdf5
+5296/5296 [==============================] - 10s 2ms/sample - loss: 0.6494 - acc: 0.5814 - val_loss: 0.5123 - val_acc: 0.6098
+
+4 ### 0.7528248587570622
+# https://github.com/mhmoodlan/cyclic-learning-rate 
+  def createModel(self):
+    input_text = Input(shape=(1,), dtype='string')
+    embedding = Lambda(self.use_embedding, output_shape=(512,))(input_text)
+    dense = Dense(512, activation='relu')(
+        embedding)  #kernel_regularizer=l1(0.0001) #
+    dense = Dropout(0.4)(dense)
+    pred = Dense(self.n_labels, activation='softmax')(dense)
+    self.model = Model(inputs=[input_text], outputs=pred)
+    # {triangular, triangular2, exp_range}
+    self.model.compile(
+        loss='categorical_crossentropy',
+        optimizer=tf.keras.optimizers.Adam(
+            learning_rate=clr.cyclic_learning_rate(global_step=0,
+                                                   learning_rate=0.001,
+                                                   max_lr=0.1,
+                                                   step_size=100.,
+                                                   gamma=0.9994,
+                                                   mode='triangular2')),
+        metrics=['accuracy'])
+    print(self.model.summary())
+              precision    recall  f1-score   support
+
+      unknow       0.75      0.28      0.40       109
+      update       0.78      0.94      0.85       980
+         new       0.58      0.36      0.45       327
+
+    accuracy                           0.75      1416
+   macro avg       0.70      0.52      0.57      1416
+weighted avg       0.73      0.75      0.72      1416
+[[ 30  46  33]
+ [ 10 918  52]
+ [  0 209 118]]
+ 448.1 MiB~ 2650.4 MiB
+Overall Time:  163.26122665405273 s
+Epoch 3/20
+5248/5296 [============================>.] - ETA: 0s - loss: 0.4929 - acc: 0.6663
+Epoch 00003: val_loss improved from 0.45947 to 0.44131, saving model to serial-no/4/03.hdf5
+5296/5296 [==============================] - 7s 1ms/sample - loss: 0.4942 - acc: 0.6656 - val_loss: 0.4413 - val_acc: 0.6702
+
+
+4 ### 0.7676553672316384
+# https://github.com/mhmoodlan/cyclic-learning-rate
+  def createModel(self):
+    input_text = Input(shape=(1,), dtype='string')
+    embedding = Lambda(self.use_embedding, output_shape=(512,))(input_text)
+    dense = Dense(512, activation='relu')(
+        embedding)  #kernel_regularizer=l1(0.0001) #
+    dense = Dropout(0.4)(dense)
+    pred = Dense(self.n_labels, activation='softmax')(dense)
+    self.model = Model(inputs=[input_text], outputs=pred)
+    # {triangular, triangular2, exp_range}
+    self.model.compile(
+        loss='categorical_crossentropy',
+        optimizer=tf.keras.optimizers.Adam(
+            learning_rate=clr.cyclic_learning_rate(global_step=0,
+                                                   learning_rate=0.001,
+                                                   max_lr=0.1,
+                                                   step_size=100.,
+                                                   gamma=0.9994,
+                                                   mode='exp_range')),
+        metrics=['accuracy'])
+    print(self.model.summary())
+              precision    recall  f1-score   support
+
+      unknow       0.85      0.53      0.66       109
+      update       0.79      0.93      0.85       980
+         new       0.60      0.37      0.46       327
+
+    accuracy                           0.77      1416
+   macro avg       0.75      0.61      0.66      1416
+weighted avg       0.75      0.77      0.75      1416
+[[ 58  33  18]
+ [ 10 909  61]
+ [  0 207 120]]
+ 448.2 MiB ~ 2655.3 MiB
+ Overall Time:  163.71749758720398 s
+Epoch 5/20
+5248/5296 [============================>.] - ETA: 0s - loss: 0.6572 - acc: 0.6370
+Epoch 00005: val_loss improved from 0.42617 to 0.41904, saving model to serial-no/4/05.hdf5
+5296/5296 [==============================] - 8s 1ms/sample - loss: 0.6572 - acc: 0.6377 - val_loss: 0.4190 - val_acc: 0.6830
+
 
 # https://github.com/bckenstler/CLR
 4 ### 0.6970338983050848 
@@ -126,5 +293,36 @@ Epoch 1/20
 Epoch 00001: val_loss improved from inf to 0.48057, saving model to serial-no/4/01.hdf5
 5296/5296 [==============================] - 11s 2ms/sample - loss: 0.6089 - acc: 0.5984 - val_loss: 0.4806 - val_acc: 0.6415
 
+# https://github.com/bckenstler/CLR
+4 ### 0.7097457627118644
+clr = CyclicLR(base_lr=0.001,
+                     max_lr=0.006,
+                     step_size=100.,
+                     mode='exp_range',
+                     gamma=0.99994)  # 2-10 times of iterations (50)
+hist = self.model.fit(self.train_x,
+                      self.train_y,
+                      validation_split=0.2,
+                      epochs=20,
+                      batch_size=128,
+                      callbacks=[ckpt, clr])
 
+              precision    recall  f1-score   support
+
+      unknow       0.75      0.28      0.40       109
+      update       0.71      0.98      0.82       980
+         new       0.58      0.04      0.08       327
+
+    accuracy                           0.71      1416
+   macro avg       0.68      0.43      0.44      1416
+weighted avg       0.68      0.71      0.62      1416
+[[ 30  78   1]
+ [ 10 961   9]
+ [  0 313  14]]
+448.4 MiB ~ 2644.0 MiB
+Overall Time:  173.9226644039154 s
+Epoch 1/20
+5248/5296 [============================>.] - ETA: 0s - loss: 0.6060 - acc: 0.6029 
+Epoch 00001: val_loss improved from inf to 0.49729, saving model to serial-no/4/01.hdf5
+5296/5296 [==============================] - 11s 2ms/sample - loss: 0.6055 - acc: 0.6033 - val_loss: 0.4973 - val_acc: 0.6226
 

@@ -30,7 +30,8 @@ from rich import print
 import pdb
 from matplotlib import pyplot as plt
 import numpy as np
-from clr_callback import CyclicLR
+# from clr_callback import CyclicLR
+import clr
 # import tensorflow_addons as tfa
 # from tensorflow_addons.optimizers import CyclicalLearningRate
 
@@ -91,9 +92,17 @@ class VanillaUSE():
     dense = Dropout(0.4)(dense)
     pred = Dense(self.n_labels, activation='softmax')(dense)
     self.model = Model(inputs=[input_text], outputs=pred)
-    self.model.compile(loss='categorical_crossentropy',
-                       optimizer="adam",
-                       metrics=['accuracy'])
+    # {triangular, triangular2, exp_range}
+    self.model.compile(
+        loss='categorical_crossentropy',
+        optimizer=tf.keras.optimizers.Adam(
+            learning_rate=clr.cyclic_learning_rate(global_step=0,
+                                                   learning_rate=0.001,
+                                                   max_lr=0.1,
+                                                   step_size=100.,
+                                                   gamma=0.9994,
+                                                   mode='exp_range')),
+        metrics=['accuracy'])
     print(self.model.summary())
 
   def createModelBN(self):
@@ -132,17 +141,12 @@ class VanillaUSE():
                              verbose=1,
                              save_best_only=True,
                              mode='auto')
-      clr = CyclicLR(base_lr=0.001,
-                     max_lr=0.006,
-                     step_size=100.,
-                     mode='exp_range',
-                     gamma=0.99994)  # 2-10 times of iterations (50)
       hist = self.model.fit(self.train_x,
                             self.train_y,
                             validation_split=0.2,
                             epochs=20,
                             batch_size=128,
-                            callbacks=[ckpt, clr])
+                            callbacks=[ckpt])
       pred = self.model.predict(self.valid_x)
       self.pred = np.argmax(pred, axis=1)
       self.valid_y_ = np.argmax(self.valid_y, axis=1)
