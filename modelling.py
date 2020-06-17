@@ -1,6 +1,7 @@
 """
 use 0603 envr
 ssh files under processed_data and data
+{'unknow': 0, 'update': 1, 'new': 2}
 """
 
 from collections import Counter
@@ -23,6 +24,12 @@ from sklearn.metrics import precision_recall_fscore_support
 import random
 import time
 from memory_profiler import profile
+from sklearn.metrics import classification_report, confusion_matrix
+import pandas as pd
+from rich import print
+import pdb
+from matplotlib import pyplot as plt
+import numpy as np
 
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # remove logging info
@@ -79,8 +86,7 @@ class VanillaUSE():
     dense = Dense(512, activation='relu')(
         embedding)  #kernel_regularizer=l1(0.0001) #
     dense = Dense(512, activation='tanh')(dense)
-    dense = Dense(512, activation='tanh')(dense)
-    dense = Dense(512, activation='tanh')(dense)
+    dense = Dense(256, activation='relu')(dense)
     dense = Dropout(0.4)(dense)
     pred = Dense(self.n_labels, activation='softmax')(dense)
     self.model = Model(inputs=[input_text], outputs=pred)
@@ -110,7 +116,7 @@ class VanillaUSE():
     #                    metrics=['accuracy'])
     print(self.model.summary())
 
-  # @profile
+  @profile
   def train(self, filepath):
     try:
       os.mkdir(filepath)
@@ -135,13 +141,14 @@ class VanillaUSE():
       self.pred = np.argmax(pred, axis=1)
       self.valid_y_ = np.argmax(self.valid_y, axis=1)
 
+    target_names = ['unknow', 'update', 'new']
     print(accuracy_score(self.valid_y_, self.pred))
     print(accuracy_score(self.valid_y_, self.pred, normalize=False))
     print(precision_recall_fscore_support(self.valid_y_, self.pred))
     print(
-        precision_recall_fscore_support(self.valid_y_,
-                                        self.pred,
-                                        average='micro'))
+        classification_report(self.valid_y_,
+                              self.pred,
+                              target_names=target_names))
 
   def consolidateResult(self, filepath):
     import pandas as pd
@@ -156,21 +163,23 @@ if __name__ == '__main__':
   start_time = time.time()
   # input data: "processed_data/randomized_sents_1k.npy" | "processed_data/randomized_sents_2k.npy"
   # input label: "processed_data/randomized_labels_1k.npy" | "processed_data/randomized_labels_2k.npy"
-  train_sents_path = 'processed_data/randomized_sents_1k.npy'
-  train_labels_path = 'processed_data/randomized_labels_1k.npy'
+  # train_sents_path = 'processed_data/randomized_sents_1k.npy'
+  # train_labels_path = 'processed_data/randomized_labels_1k.npy'
+  train_sents_path = 'processed_data/randomized_sents_2k.npy'
+  train_labels_path = 'processed_data/randomized_labels_2k.npy'
   valid_sents_path = 'data/valid_sents_mixed.npy'
   valid_labels_path = 'data/valid_labels_onehot_mixed.npy'
   dr = DataReader(train_sents_path, train_labels_path, valid_sents_path,
                   valid_labels_path)
   # pdb.set_trace()
-  dr.lowerCase()
+  # dr.lowerCase()
   dr.randomizeData()
 
   vu = VanillaUSE(dr.train_sents, dr.train_labels, dr.valid_sents,
                   dr.valid_labels)
   vu.createModel()
-  vu.train(filepath='Vanilla_USE')
-  vu.consolidateResult(filepath='Vanilla_USE')
+  vu.train(filepath='serial-no/20')
+  vu.consolidateResult(filepath='serial-no/20')
   # vu.createModelBN()
   # vu.train(filepath='Vanilla_USE_BN')
   # vu.consolidateResult(filepath='Vanilla_USE_BN')

@@ -1,6 +1,6 @@
 ## 1k
 
-### 0.7747175141242938
+### 0.766242937853107
   def createModel(self):
     input_text = Input(shape=(1,), dtype='string')
     embedding = Lambda(self.use_embedding, output_shape=(512,))(input_text)
@@ -14,7 +14,7 @@
                        metrics=['accuracy'])
     print(self.model.summary())
 
-### 0.8347457627118644
+### 0.812146892655367
   def createModel(self):
     input_text = Input(shape=(1,), dtype='string')
     embedding = Lambda(self.use_embedding, output_shape=(512,))(input_text)
@@ -29,7 +29,7 @@
                        metrics=['accuracy'])
     print(self.model.summary())
 
-### 0.806497175141243
+### 0.8149717514124294
   def createModel(self):
     input_text = Input(shape=(1,), dtype='string')
     embedding = Lambda(self.use_embedding, output_shape=(512,))(input_text)
@@ -45,7 +45,7 @@
                        metrics=['accuracy'])
     print(self.model.summary())    
 
-### 0.8149717514124294
+### 0.8114406779661016
   def createModel(self):
     input_text = Input(shape=(1,), dtype='string')
     embedding = Lambda(self.use_embedding, output_shape=(512,))(input_text)
@@ -61,7 +61,7 @@
                        metrics=['accuracy'])
     print(self.model.summary())
 
-### 0.6659604519774012
+### 0.7217514124293786
   def createModel(self):
     input_text = Input(shape=(1,), dtype='string')
     embedding = Lambda(self.use_embedding, output_shape=(512,))(input_text)
