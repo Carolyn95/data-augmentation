@@ -87,22 +87,16 @@ class VanillaUSE():
   def createModel(self):
     input_text = Input(shape=(1,), dtype='string')
     embedding = Lambda(self.use_embedding, output_shape=(512,))(input_text)
-    dense = Dense(512, activation='relu')(
+    dense = Dense(1024, activation='relu')(
         embedding)  #kernel_regularizer=l1(0.0001) #
+    dense = Dense(1024, activation='relu')(dense)
     dense = Dropout(0.4)(dense)
     pred = Dense(self.n_labels, activation='softmax')(dense)
     self.model = Model(inputs=[input_text], outputs=pred)
     # {triangular, triangular2, exp_range}
-    self.model.compile(
-        loss='categorical_crossentropy',
-        optimizer=tf.keras.optimizers.Adam(
-            learning_rate=clr.cyclic_learning_rate(global_step=0,
-                                                   learning_rate=0.001,
-                                                   max_lr=0.1,
-                                                   step_size=100.,
-                                                   gamma=0.9994,
-                                                   mode='exp_range')),
-        metrics=['accuracy'])
+    self.model.compile(loss='categorical_crossentropy',
+                       optimizer="adam",
+                       metrics=['accuracy'])
     print(self.model.summary())
 
   def createModelBN(self):
@@ -189,8 +183,8 @@ if __name__ == '__main__':
   vu = VanillaUSE(dr.train_sents, dr.train_labels, dr.valid_sents,
                   dr.valid_labels)
   vu.createModel()
-  vu.train(filepath='serial-no/4')
-  vu.consolidateResult(filepath='serial-no/4')
+  vu.train(filepath='serial-no/7')
+  vu.consolidateResult(filepath='serial-no/7')
   # vu.createModelBN()
   # vu.train(filepath='Vanilla_USE_BN')
   # vu.consolidateResult(filepath='Vanilla_USE_BN')

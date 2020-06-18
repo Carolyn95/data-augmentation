@@ -1,4 +1,4 @@
-### 0.778954802259887
+1 ### 0.778954802259887
   def createModel(self):
     input_text = Input(shape=(1,), dtype='string')
     embedding = Lambda(self.use_embedding, output_shape=(512,))(input_text)
@@ -12,7 +12,7 @@
                        metrics=['accuracy'])
     print(self.model.summary())
 
-### 0.7838983050847458
+2 ### 0.7838983050847458
   def createModel(self):
     input_text = Input(shape=(1,), dtype='string')
     embedding = Lambda(self.use_embedding, output_shape=(512,))(input_text)
@@ -27,7 +27,7 @@
                        metrics=['accuracy'])
     print(self.model.summary()) 
 
-### 0.786723163841808
+3 ### 0.786723163841808
   def createModel(self):
     input_text = Input(shape=(1,), dtype='string')
     embedding = Lambda(self.use_embedding, output_shape=(512,))(input_text)
@@ -326,3 +326,106 @@ Epoch 1/20
 Epoch 00001: val_loss improved from inf to 0.49729, saving model to serial-no/4/01.hdf5
 5296/5296 [==============================] - 11s 2ms/sample - loss: 0.6055 - acc: 0.6033 - val_loss: 0.4973 - val_acc: 0.6226
 
+5 ### 0.7507062146892656
+   def createModel(self):
+    input_text = Input(shape=(1,), dtype='string')
+    embedding = Lambda(self.use_embedding, output_shape=(512,))(input_text)
+    dense = Dense(1024, activation='relu')(
+        embedding)  #kernel_regularizer=l1(0.0001) #
+    dense = Dropout(0.4)(dense)
+    pred = Dense(self.n_labels, activation='softmax')(dense)
+    self.model = Model(inputs=[input_text], outputs=pred)
+    # {triangular, triangular2, exp_range}
+    self.model.compile(loss='categorical_crossentropy',
+                       optimizer="adam",
+                       metrics=['accuracy'])
+    print(self.model.summary())
+              precision    recall  f1-score   support
+
+      unknow       0.75      0.28      0.40       109
+      update       0.85      0.85      0.85       980
+         new       0.50      0.61      0.55       327
+
+    accuracy                           0.75      1416
+   macro avg       0.70      0.58      0.60      1416
+weighted avg       0.76      0.75      0.75      1416
+[[ 30  15  64]
+ [ 10 833 137]
+ [  0 127 200]]
+448.3 Mb~ 2647.5 Mb
+Overall Time:  163.89432406425476 s
+Epoch 4/20
+5248/5296 [============================>.] - ETA: 0s - loss: 0.5709 - acc: 0.6402
+Epoch 00004: val_loss improved from 0.42704 to 0.41996, saving model to serial-no/4/04.hdf5
+5296/5296 [==============================] - 8s 1ms/sample - loss: 0.5727 - acc: 0.6399 - val_loss: 0.4200 - val_acc: 0.6838
+
+
+6 ### 0.692090395480226
+  def createModel(self):
+    input_text = Input(shape=(1,), dtype='string')
+    embedding = Lambda(self.use_embedding, output_shape=(512,))(input_text)
+    dense = Dense(512, activation='relu')(
+        embedding)  #kernel_regularizer=l1(0.0001) #
+    dense = Dense(512, activation='relu')(dense)
+    dense = Dropout(0.4)(dense)
+    pred = Dense(self.n_labels, activation='softmax')(dense)
+    self.model = Model(inputs=[input_text], outputs=pred)
+    # {triangular, triangular2, exp_range}
+    self.model.compile(loss='categorical_crossentropy',
+                       optimizer="adam",
+                       metrics=['accuracy'])
+    print(self.model.summary()) 
+448.1 Mb~ 2651.2 Mb
+Overall Time:  164.71911430358887 s
+              precision    recall  f1-score   support
+
+      unknow       0.00      0.00      0.00       109
+      update       0.69      1.00      0.82       980
+         new       0.00      0.00      0.00       327
+
+    accuracy                           0.69      1416
+   macro avg       0.23      0.33      0.27      1416
+weighted avg       0.48      0.69      0.57      1416
+[[  0 109   0]
+ [  0 980   0]
+ [  0 327   0]]
+Epoch 1/20
+5248/5296 [============================>.] - ETA: 0s - loss: 0.6197 - acc: 0.5951 
+Epoch 00001: val_loss improved from inf to 0.64970, saving model to serial-no/4/01.hdf5
+5296/5296 [==============================] - 11s 2ms/sample - loss: 0.6187 - acc: 0.5954 - val_loss: 0.6497 - val_acc: 0.5940    
+
+7 ### 0.0769774011299435
+  def createModel(self):
+    input_text = Input(shape=(1,), dtype='string')
+    embedding = Lambda(self.use_embedding, output_shape=(512,))(input_text)
+    dense = Dense(1024, activation='relu')(
+        embedding)  #kernel_regularizer=l1(0.0001) #
+    dense = Dense(1024, activation='relu')(dense)
+    dense = Dropout(0.4)(dense)
+    pred = Dense(self.n_labels, activation='softmax')(dense)
+    self.model = Model(inputs=[input_text], outputs=pred)
+    # {triangular, triangular2, exp_range}
+    self.model.compile(loss='categorical_crossentropy',
+                       optimizer="adam",
+                       metrics=['accuracy'])
+    print(self.model.summary())
+
+Overall Time:  164.635107755661 s    
+              precision    recall  f1-score   support
+
+      unknow       0.08      1.00      0.14       109
+      update       0.00      0.00      0.00       980
+         new       0.00      0.00      0.00       327
+
+    accuracy                           0.08      1416
+   macro avg       0.03      0.33      0.05      1416
+weighted avg       0.01      0.08      0.01      1416
+[[109   0   0]
+ [980   0   0]
+ [327   0   0]]
+Epoch 1/20
+5248/5296 [============================>.] - ETA: 0s - loss: 0.7160 - acc: 0.5842 
+Epoch 00001: val_loss improved from inf to 0.89094, saving model to serial-no/4/01.hdf5
+5296/5296 [==============================] - 11s 2ms/sample - loss: 0.7226 - acc: 0.5831 - val_loss: 0.8909 - val_acc: 0.5562 
+Epoch 00020: val_loss did not improve from 0.89094
+5296/5296 [==============================] - 8s 1ms/sample - loss: 1045.1001 - acc: 0.4528 - val_loss: 464.6708 - val_acc: 0.2340
