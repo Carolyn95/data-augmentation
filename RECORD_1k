@@ -429,3 +429,26 @@ Epoch 00001: val_loss improved from inf to 0.89094, saving model to serial-no/4/
 5296/5296 [==============================] - 11s 2ms/sample - loss: 0.7226 - acc: 0.5831 - val_loss: 0.8909 - val_acc: 0.5562 
 Epoch 00020: val_loss did not improve from 0.89094
 5296/5296 [==============================] - 8s 1ms/sample - loss: 1045.1001 - acc: 0.4528 - val_loss: 464.6708 - val_acc: 0.2340
+
+
+8 ### 
+   def createModel(self):
+    input_text = Input(shape=(1,), dtype='string')
+    embedding = Lambda(self.use_embedding, output_shape=(512,))(input_text)
+    dense = Dense(512)(embedding)  #kernel_regularizer=l1(0.0001) #
+    dense = BatchNormalization()(dense)
+    dense = ReLU()(dense)
+    dense = Dropout(0.4)(dense)
+    dense = Dense(512)(dense)
+    dense = BatchNormalization()(dense)
+    dense = ReLU()(dense)
+    dense = Dropout(0.4)(dense)
+    pred = Dense(self.n_labels, activation='softmax')(dense)
+    self.model = Model(inputs=[input_text], outputs=pred)
+    # {triangular, triangular2, exp_range}
+    self.model.compile(loss='categorical_crossentropy',
+                       optimizer="adam",
+                       metrics=['accuracy'])
+    print(self.model.summary())
+
+    
