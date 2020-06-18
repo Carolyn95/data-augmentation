@@ -431,7 +431,7 @@ Epoch 00020: val_loss did not improve from 0.89094
 5296/5296 [==============================] - 8s 1ms/sample - loss: 1045.1001 - acc: 0.4528 - val_loss: 464.6708 - val_acc: 0.2340
 
 
-8 ### 
+8 ### 0.8050847457627118
    def createModel(self):
     input_text = Input(shape=(1,), dtype='string')
     embedding = Lambda(self.use_embedding, output_shape=(512,))(input_text)
@@ -451,4 +451,19 @@ Epoch 00020: val_loss did not improve from 0.89094
                        metrics=['accuracy'])
     print(self.model.summary())
 
-    
+  Overall Time:  171.20242595672607 s 
+                precision    recall  f1-score   support
+
+      unknow       0.84      0.71      0.77       109
+      update       0.85      0.88      0.86       980
+         new       0.65      0.62      0.63       327
+
+    accuracy                           0.81      1416
+   macro avg       0.78      0.73      0.75      1416
+weighted avg       0.80      0.81      0.80      1416
+[[ 77  25   7]
+ [ 15 861 104]
+ [  0 125 202]]
+
+ Epoch 00018: val_loss improved from 0.39574 to 0.39387, saving model to serial-no/8/18.hdf5
+5296/5296 [==============================] - 8s 1ms/sample - loss: 0.3467 - acc: 0.7504 - val_loss: 0.3939 - val_acc: 0.6838
