@@ -1,16 +1,3 @@
-# version 0: my preprocessing pipeline
-# version 0 - improvement: word distribution to cut
-# version 1: use original email, ?tokenization? but retain lastest email by FROM: Sent: To: only
-# version 2: reverse signature finding order
-
-# csv + json
-
-# obvious problem in my pipeline:
-# 1, only "hi," "hi, name", "name" left
-# 2, list of characters left, "M e e t i n g"
-# 3, sentences got chopped off
-
-# save train.csv & test.csv _v1 to compare
 
 
 """
@@ -25,8 +12,11 @@
 # - final output saves in 'intentions_singular.npy'
 
 ## process email_body: 
-# - remove nan (originally empty records)
+# - remove those without labels
+# - remove nan (originally empty records) 
 # - remove multi-labels records
+# - chop every records by 'Sent: | From: | To: '
+
 # - remove processed empty records
 ### dec has empty emails: index in org_data: [647, 648, 649, 650, 651, 1378]
 ### CHANGES: compare before, separate signature by rules this time, take [-1] instead of [0]
@@ -43,7 +33,11 @@ import os
 from functools import reduce
 import operator
 import fasttext
+from pathlib import Path
 
+class CsvToArray():
+  def __init__(self, path):
+    self.dec = pd.read_excel('./SME_emails.xlsx', sheet_name='NTUCDec2019')
 
 class BaseArray():
 
@@ -71,7 +65,9 @@ class LabelArray(BaseArray):
     empty_labels = [
         i for i, l in enumerate(self.data) if not isinstance(l, str)
     ]
-    with open(data_dir + '/' + prefix + 'empty_labels.pkl', 'wb') as f:
+    path = Path(data_dir)
+    path.mkdir(parents=True, exist_ok=True)
+    with open(data_dir + '/' + prefix + 'empty_label_indexes.pkl', 'wb') as f:
       pkl.dump(empty_labels, f)
     self.labels = np.delete(self.data, empty_labels)
 
@@ -82,17 +78,17 @@ class LabelArray(BaseArray):
     new_labels = [l.split(';') for l in self.labels_p]
     new_labels_length = [len(l) for l in new_labels]
     mul_labels = [i for i, nl in enumerate(new_labels_length) if nl > 1]
-    with open(data_dir + '/' + self.prefix + 'mul_labels.pkl', 'wb') as f:
+    with open(data_dir + '/' + self.prefix + 'mul_labels_indexes.pkl', 'wb') as f:
       pkl.dump(mul_labels, f)
     self.labels_p = np.delete(self.labels_p, mul_labels)
 
     processed_empty = [i for i, l in enumerate(self.labels_p) if not l]
-
-    with open(data_dir + '/' + self.prefix + 'processed_empty.pkl', 'wb') as f:
+    # processed_empty means original labels don't contain target labels
+    with open(data_dir + '/' + self.prefix + 'processed_empty_indexes.pkl', 'wb') as f:
       pkl.dump(processed_empty, f)
 
     self.labels_p = np.delete(self.labels_p, processed_empty)
-    np.save(data_dir + '/' + self.prefix + 'intentions_singular.npy',
+    np.save(data_dir + '/' + self.prefix + 'intentions_singular_indexes.npy',
             self.labels_p)
     print(len(self.labels_p))
 
@@ -116,20 +112,23 @@ class EmailArray(BaseArray):
 
   def matchEmails(self):
 
-    with open(self.file_prefix + 'empty_labels.pkl', 'rb') as f:
+    with open(self.file_prefix + 'empty_labels_indexes.pkl', 'rb') as f:
       nan_idx = pkl.load(f)
-    with open(self.file_prefix + 'mul_labels.pkl', 'rb') as f:
+    with open(self.file_prefix + 'mul_labels_indexes.pkl', 'rb') as f:
       mul_idx = pkl.load(f)
-    with open(self.file_prefix + 'processed_empty.pkl', 'rb') as f:
+    with open(self.file_prefix + 'processed_empty_indexes.pkl', 'rb') as f:
       emp_idx = pkl.load(f)
 
-    # - remove nan (originally empty records)
+    # - remove those without labels
     self.emails = np.delete(self.data, nan_idx)
-    # - remove multi-labels records
+    # - remove multi-labels 
     self.emails = np.delete(self.emails, mul_idx)
-    # - remove processed empty records
+    # - remove processed empty labels
     self.emails = np.delete(self.emails, emp_idx)
     print(len(self.emails))
+
+  def parseRawMessage(self):
+
 
   def separateSignature(self):
     self.email_bodies = []
@@ -198,8 +197,6 @@ class EmailArray(BaseArray):
     np.save(self.file_prefix + 'email_bodies.npy', self.email_bodies)
 
 
-
-
 if __name__ == '__main__':
   # 2805 => 2790 => 2770
   # data_dir = 'processed_data'
@@ -219,7 +216,7 @@ if __name__ == '__main__':
   # file_name = 'dec_bodies.npy'
   # prefix = 'dec_'
 
-  data_dir = 'processed_data'
+  data_dir = 'data_v1'
   file_name = 'jan_bodies.npy'
   prefix = 'jan_'
 
