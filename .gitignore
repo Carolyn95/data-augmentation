@@ -1,3 +1,4 @@
+*.pkl
 *.json
 exprmt-records/
 *Plans.md
