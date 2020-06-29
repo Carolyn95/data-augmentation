@@ -91,14 +91,14 @@ class DataReader():
 
 
 if __name__ == '__main__':
-  save_dir = 'pairwise_exprmt/data_v1'
-  seril_no = '14-4'  # 13-0 | 13-1 | 13-2 | 13-3 | 13-4
+  save_dir = 'pairwise_exprmt/data_v2'
+  seril_no = '15-0'  # 13-0 | 13-1 | 13-2 | 13-3 | 13-4
   save_path = save_dir + '/' + seril_no + '/'
   save_path = Path(save_path)
   save_path.mkdir(parents=True, exist_ok=True)
 
-  labels = np.load('data_v1/all_feed_labels.npy', allow_pickle=True)
-  sents = np.load('data_v1/all_feed_emails.npy', allow_pickle=True)
+  labels = np.load('data_v2/all_feed_labels.npy', allow_pickle=True)
+  sents = np.load('data_v2/all_feed_emails.npy', allow_pickle=True)
   # valid_labels = np.load('data/valid_labels_str_mixed.npy', allow_pickle=True)
   # valid_sents = np.load('data/valid_sents_mixed.npy', allow_pickle=True)
   dr = DataReader(save_path, labels, sents)
