@@ -51,7 +51,6 @@ class DataReader():
     self.valid_sents = np.load(valid_sents, allow_pickle=True)
     self.valid_labels = np.load(valid_labels, allow_pickle=True)
     self.nlp = English()
-    pdb.set_trace()
     assert len(self.train_sents) == len(self.train_labels)
     assert len(self.valid_sents) == len(self.valid_labels)
 
@@ -102,7 +101,7 @@ class DataReader():
 
   def onehotEncodingLabel(self, save_dir):
     cats = list(set(np.concatenate((self.train_labels, self.valid_labels))))
-    label_to_int = [{l: i} for i, l in enumerate(cats)]
+    label_to_int = dict((l, i) for i, l in enumerate(cats))
     with open(save_dir / 'label_to_int.pkl', 'wb') as f:
       pkl.dump(label_to_int, f)
     int_train_labels = [label_to_int[l] for l in self.train_labels]
@@ -112,14 +111,14 @@ class DataReader():
       temp = np.zeros(len(cats))
       temp[i] = 1
       self.onehot_train_labels.append(temp)
-    self.onehot_train_labels = np.array(onehot_train_labels)
+    self.onehot_train_labels = np.array(self.onehot_train_labels)
 
-    onehot_valid_labels = []
+    self.onehot_valid_labels = []
     for i in int_valid_labels:
       temp = np.zeros(len(cats))
       temp[i] = 1
       self.onehot_valid_labels.append(temp)
-    self.onehot_valid_labels = np.array(onehot_valid_labels)
+    self.onehot_valid_labels = np.array(self.onehot_valid_labels)
 
   def randomizeData(self, save_dir):
     p1 = np.random.permutation(len(self.onehot_train_labels))
@@ -249,8 +248,8 @@ if __name__ == '__main__':
   dr.onehotEncodingLabel(input_path)
   dr.randomizeData(input_path)
 
-  vu = VanillaUSE(dr.train_sents, dr.train_labels, dr.valid_sents,
-                  dr.valid_labels)
+  vu = VanillaUSE(dr.train_sents, dr.onehot_train_labels, dr.valid_sents,
+                  dr.onehot_valid_labels)
   vu.createModel()
   vu.train(filepath=str(input_path) + 'model')
   vu.consolidateResult(str(input_path))
