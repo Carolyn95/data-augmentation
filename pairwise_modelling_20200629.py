@@ -90,10 +90,10 @@ class DataReader():
       for train_index, valid_index in spliter.split(all_sents, all_labels):
         print('Stratified training size is {}, validation size is {}'.format(
             len(train_index), len(valid_index)))
-        self.train_sents, self.valid_sents = self.all_sents[
-            train_index], self.all_sents[valid_index]
-        self.train_labels, self.valid_labels = self.all_labels[
-            train_index], self.all_labels[valid_index]
+        self.train_sents, self.valid_sents = all_sents[train_index], all_sents[
+            valid_index]
+        self.train_labels, self.valid_labels = all_labels[
+            train_index], all_labels[valid_index]
     print('Training set label distribution is {}'.format(
         Counter(self.train_labels)))
     print('Validation set label distribution is {}'.format(
@@ -198,9 +198,8 @@ class VanillaUSE():
       ckpt = ModelCheckpoint(filepath + '/{epoch:02d}.hdf5',
                              monitor='val_loss',
                              verbose=1,
-                             save_best_only=False,
-                             mode='auto',
-                             save_freq="epoch")  # ,save_freq="epoch"
+                             save_best_only=True,
+                             mode='auto')  # ,save_freq="epoch"
       hist = self.model.fit(self.train_x,
                             self.train_y,
                             validation_split=0.2,
@@ -239,6 +238,8 @@ if __name__ == '__main__':
 
   train_sents_path = input_path / 'update_new_sents_train.npy'
   train_labels_path = input_path / 'update_new_labels_train.npy'
+  # valid_sents_path = input_path / 'update_new_sents_valid.npy'
+  # valid_labels_path = input_path / 'update_new_labels_valid.npy'
   valid_sents_path = input_path / 'update_new_sents_valid.npy'
   valid_labels_path = input_path / 'update_new_labels_valid.npy'
 
@@ -251,6 +252,6 @@ if __name__ == '__main__':
   vu = VanillaUSE(dr.train_sents, dr.onehot_train_labels, dr.valid_sents,
                   dr.onehot_valid_labels)
   vu.createModel()
-  vu.train(filepath=str(input_path) + 'model')
+  vu.train(filepath=str(input_path) + '/model')
   vu.consolidateResult(str(input_path))
   print('Overall Time: ', str(time.time() - start_time), 's')
