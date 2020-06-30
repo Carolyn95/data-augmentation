@@ -1,3 +1,4 @@
+""" 20200628
 import numpy as np
 train_labels = np.load('processed_data/all_onthot_labels_balanced.npy')
 valid_labels = np.load('data/valid_labels_onehot_mixed.npy')
@@ -13,6 +14,7 @@ str_valid_labels = [mapping[i] for i in int_valid_labels]
 np.save('processed_data/all_str_labels_balanced.npy', str_train_labels)
 np.save('data/valid_labels_str_mixed.npy', str_valid_labels)
 """
+""" bef20200628
 from transformers import GPT2Config, OpenAIGPTConfig
 import pdb
 
