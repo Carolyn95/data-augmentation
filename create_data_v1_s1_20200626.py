@@ -1,3 +1,8 @@
+"""
+Master piece for:
+1. Convert Excel to Array
+2. Convert Json to Array
+"""
 import pdb
 import pandas as pd
 from pathlib import Path
