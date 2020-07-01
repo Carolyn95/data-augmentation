@@ -15,10 +15,12 @@ import numpy as np
 import pandas as pd
 from collections import Counter
 import pdb
+import time
 from EmailDataFactory import filterByLabel, balanceSplitDataset
 from ScoopDataProcessor import ScoopDataProcessor
 from HistoryFinder import HistoryFinder
 from RevScoopDataProcessor import RevScoopDataProcessor
+from IntentClassifier import ModelDataReader, VanillaUSE
 
 
 class DataReader():
@@ -79,18 +81,41 @@ if __name__ == '__main__':
   data_dir = parent_dir + 'trytry/'
   save_dir = parent_dir + serial_no
 
+  # Step 1
   # all_labels = np.load(data_dir + 'all__labels.npy', allow_pickle=True)
   # all_emails = np.load(data_dir + 'all__emails.npy', allow_pickle=True)
-
   # dr = DataReader(save_dir)
   # dr.preprocess(all_labels, all_emails, ['update', 'new'])
 
-  train_label = np.load(save_dir + 'train_label.npy', allow_pickle=True)
-  valid_label = np.load(save_dir + 'valid_label.npy', allow_pickle=True)
-  train_sent = np.load(save_dir + 'train_email.npy', allow_pickle=True)
-  valid_sent = np.load(save_dir + 'valid_email.npy', allow_pickle=True)
+  # Step 2
+  # train_label = np.load(save_dir + 'train_label.npy', allow_pickle=True)
+  # valid_label = np.load(save_dir + 'valid_label.npy', allow_pickle=True)
+  # train_sent = np.load(save_dir + 'train_email.npy', allow_pickle=True)
+  # valid_sent = np.load(save_dir + 'valid_email.npy', allow_pickle=True)
 
-  dp = DataProcessor(save_dir)
-  dp.cleanBySigClf(train_sent, valid_sent, train_label, valid_label)
-  dp.cleanByKW(train_sent, valid_sent, train_label, valid_label)
-  dp.cleanBySigClfRev(train_sent, valid_sent, train_label, valid_label)
+  # dp = DataProcessor(save_dir)
+  # dp.cleanBySigClf(train_sent, valid_sent, train_label, valid_label)
+  # dp.cleanByKW(train_sent, valid_sent, train_label, valid_label)
+  # dp.cleanBySigClfRev(train_sent, valid_sent, train_label, valid_label)
+
+  # Step 3
+  start_time = time.time()
+  prefix = 'scp_'  # 'KW_' | 'rev_scp_' | 'scp_'
+  input_path = Path(save_dir)
+  train_sents_path = input_path / (prefix + 'train_email.npy')
+  train_labels_path = input_path / (prefix + 'train_label.npy')
+  valid_sents_path = input_path / (prefix + 'valid_email.npy')
+  valid_labels_path = input_path / (prefix + 'valid_label.npy')
+  mdr = ModelDataReader(prefix, train_sents_path, train_labels_path,
+                        valid_sents_path, valid_labels_path)
+  mdr.getStats()
+  mdr.onehotEncodingLabel(input_path)
+  mdr.listToStr()
+  mdr.randomizeData(input_path)
+
+  vu = VanillaUSE(mdr.train_sents, mdr.onehot_train_labels, mdr.valid_sents,
+                  mdr.onehot_valid_labels)
+  vu.createModel()
+  vu.train(filepath=str(input_path) + '/' + prefix + 'model')
+  vu.consolidateResult(str(input_path) + '/' + prefix + 'model')
+  print('Overall Time: ', str(time.time() - start_time), 's')
