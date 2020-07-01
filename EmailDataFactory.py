@@ -5,12 +5,14 @@ import re
 import os
 import operator
 from pathlib import Path
+from rich import print
+from collections import Counter
 
 
 class BaseArray():
 
-  def __init__(self, data_dir, file_name):
-    self.data = np.load(data_dir + '/' + file_name, allow_pickle=True)
+  def __init__(self, data):
+    self.data = data
     print('# of original data: {} '.format(len(self.data)))
     self.adict = {
         'unknown': 'unknown',
@@ -26,129 +28,149 @@ class BaseArray():
 
 class LabelArray(BaseArray):
 
-  def __init__(self, data_dir, file_name, prefix):
-    BaseArray.__init__(self, data_dir, file_name)
-    self.prefix = prefix  # dec_
+  def __init__(self, data):
+    BaseArray.__init__(self, data)
 
-  def removeEmpty(self, save_dir):
-    empty_labels = [
-        i for i, l in enumerate(self.data) if not isinstance(l, str)
-    ]
-    print('# of empty labels: {}'.format(len(empty_labels)))
-    path = Path(save_dir)
-    path.mkdir(parents=True, exist_ok=True)
-    with open(save_dir + '/' + prefix + 'empty_labels_indexes.pkl', 'wb') as f:
-      pkl.dump(empty_labels, f)
-    self.labels = np.delete(self.data, empty_labels)
-
-  def processLabel(self, save_dir):
-    self.labels_p = [self.replace(t.lower()) for t in self.labels]
-    assert len(self.labels_p) == len(self.labels)
-
-    new_labels = [l.split(';') for l in self.labels_p]
-    new_labels_length = [len(l) for l in new_labels]
-    mul_labels = [i for i, nl in enumerate(new_labels_length) if nl > 1]
-    print('# of multiple labels: {}'.format(len(mul_labels)))
-    with open(save_dir + '/' + self.prefix + 'mul_labels_indexes.pkl',
-              'wb') as f:
-      pkl.dump(mul_labels, f)
-    self.labels_p = np.delete(self.labels_p, mul_labels)
-
-    processed_empty = [i for i, l in enumerate(self.labels_p) if not l]
-    print('# of processed empty labels: {}'.format(len(processed_empty)))
-    # processed_empty means original labels don't contain target labels
-    with open(save_dir + '/' + self.prefix + 'processed_empty_indexes.pkl',
-              'wb') as f:
-      pkl.dump(processed_empty, f)
-
-    self.labels_p = np.delete(self.labels_p, processed_empty)
-    np.save(save_dir + '/' + self.prefix + 'intentions_singular_indexes.npy',
-            self.labels_p)
-    print('# of singular labels: {}'.format(len(self.labels_p)))
+  def processLable(self):
+    problem_indexes = []
+    self.labels = []
+    for i, l in enumerate(self.data):
+      if not isinstance(l, str):
+        problem_indexes.append(i)
+      try:
+        temp = self.replace(l.lower())
+      except:
+        problem_indexes.append(i)
+        self.labels.append('__EMPTY__')
+        continue
+      else:
+        temp = temp.split(';')
+        if len(temp) != 1:
+          problem_indexes.append(i)
+          self.labels.append('__MULTIPLE__')
+        else:
+          self.labels.append(temp[0])
+    self.labels = np.array(self.labels)
+    assert len(self.data) == len(self.labels)
+    print('There are {} problematic labels'.format(len(problem_indexes)))
+    return problem_indexes
 
 
 class EmailArray(BaseArray):
 
-  def __init__(self, data_dir, save_dir, file_name, prefix):
-    BaseArray.__init__(self, data_dir, file_name)
-    self.file_prefix = save_dir + '/' + prefix  # dec_
+  def __init__(self, data):
+    BaseArray.__init__(self, data)
 
-  def cleanByLabelIndex(self):
-
-    with open(self.file_prefix + 'empty_labels_indexes.pkl', 'rb') as f:
-      nan_idx = pkl.load(f)
-    with open(self.file_prefix + 'mul_labels_indexes.pkl', 'rb') as f:
-      mul_idx = pkl.load(f)
-    with open(self.file_prefix + 'processed_empty_indexes.pkl', 'rb') as f:
-      emp_idx = pkl.load(f)
-
-    # - remove those without labels
-    self.emails = np.delete(self.data, nan_idx)
-    # - remove multi-labels
-    self.emails = np.delete(self.emails, mul_idx)
-    # - remove processed empty labels
-    self.emails = np.delete(self.emails, emp_idx)
-    print('# of emails(delete problematic labels indexes): {}'.format(
-        len(self.emails)))
-
-  def parseRawMessage(self):
-
-    def decomposeEmailToSentence(email_content: str) -> list:
-      email_sents = list(
-          filter(None, [_.strip() for _ in email_content.split('\n')]))
-      return email_sents
-
-    self.emails_p = []
-    self.empty_email_indexes = []
-    for i, e in enumerate(self.emails):
+  def preprocessEmail(self):
+    problem_indexes = []
+    self.emails = []
+    for i, e in enumerate(self.data):
       try:
-        email_text = re.sub('\S+@\S+', '__EMAILADDRESS__', e)
+        temp = re.sub('\S+@\S+', '__EMAILADDRESS__', e)
       except TypeError:
-        self.empty_email_indexes.append(i)
-        continue
-      email_text = email_text.replace(u'\xa0',
-                                      u' ').replace('&#8217;', '\'').replace(
-                                          '\\r\\n', '\n').replace('\u3000', '')
-      start_of_conversation = email_text.find('\nFrom:')
-      first_thread_email = decomposeEmailToSentence(
-          email_text[:start_of_conversation])
-
-      self.emails_p.append(' '.join(first_thread_email))
-
-    if self.empty_email_indexes:
-      self.empty_email_indexes = np.array(self.empty_email_indexes)
-      np.save(self.file_prefix + 'empty_emails.npy', self.empty_email_indexes)
-
-    self.emails_p = np.array(self.emails_p)
-    np.save(self.file_prefix + 'feed_emails.npy', self.emails_p)
-    print('# of emails after processing: {} '.format(len(self.emails_p)))
+        problem_indexes.append(i)
+        self.emails.append('__EMPTY__')
+      else:
+        self.emails.append(e)
+    self.emails = np.array(self.emails)
+    assert len(self.data) == len(self.emails)
+    print('There are {} problematic emails'.format(len(problem_indexes)))
+    return problem_indexes
 
 
-def cleanByEmailIndex(save_dir, prefix, label_array, empty_email_indexes,
-                      email_array):
-  label_array = np.delete(label_array, empty_email_indexes)
-  np.save(save_dir + '/' + prefix + 'feed_labels.npy', label_array)
+def removeProblemIndexes(save_file_prefix, label_array, email_array,
+                         indexes_to_remove):
+  label_array = np.delete(label_array, indexes_to_remove)
+  email_array = np.delete(email_array, indexes_to_remove)
+  assert len(label_array) == len(email_array)
+  save_file_dir = os.path.dirname(save_file_prefix)
+  if not os.path.exists(save_file_dir):
+    os.mkdir(save_file_dir)
+  np.save(save_file_prefix + '_labels.npy', label_array)
+  np.save(save_file_prefix + '_emails.npy', email_array)
   print('labels length: {}, emails length: {}'.format(len(label_array),
                                                       len(email_array)))
-  assert len(label_array) == len(email_array)
+  print(Counter(label_array))
+  return label_array, email_array
+
+
+def filterByLabel(save_file_prefix, label_array, email_array, labels):
+  indexes = [i for i, l in enumerate(label_array) if l in labels]
+  label_array = label_array[indexes]
+  email_array = email_array[indexes]
+  file_name_prefix = '_'.join(labels)
+  dirname = os.path.dirname(save_file_prefix)
+  np.save(dirname + '/' + file_name_prefix + '_labels.npy', label_array)
+  np.save(dirname + '/' + file_name_prefix + '_emails.npy', email_array)
+  print('after filtering, labels length: {}, emails length: {}'.format(
+      len(label_array), len(email_array)))
+  print(Counter(label_array))
+  return label_array, email_array
+
+
+def balanceSplitDataset(split_data_path,
+                        label_array,
+                        email_array,
+                        sampling_num=None,
+                        split_ratio=0.2):
+  cats, counts = np.unique(label_array, return_counts=True)
+  cat_count = {cat: count for (cat, count) in zip(cats, counts)}
+  print(cat_count)
+  sampling_num = sampling_num if sampling_num else min(counts)
+  indexes = {}
+  for cat in cats:
+    temp_indexes = np.array([i for i, l in enumerate(label_array) if l == cat
+                            ][:sampling_num])
+    indexes[cat] = temp_indexes
+  labels = np.concatenate([label_array[indexes[c]] for c in cats])
+  emails = np.concatenate([email_array[indexes[c]] for c in cats])
+
+  shuffler = np.random.permutation(sampling_num * 2)
+  print(shuffler)
+  labels, emails = labels[shuffler], emails[shuffler]
+
+  cutoff = int(sampling_num * 2 * split_ratio)
+  train_label, valid_label = labels[cutoff:], labels[:cutoff]
+  train_email, valid_email = emails[cutoff:], emails[:cutoff]
+
+  np.save(split_data_path + 'train_label.npy', train_label)
+  np.save(split_data_path + 'train_email.npy', train_email)
+  np.save(split_data_path + 'valid_label.npy', valid_label)
+  np.save(split_data_path + 'valid_email.npy', valid_email)
+
+  print("Train size {}, Test size {}".format(len(train_label),
+                                             len(valid_label)))
+  assert len(train_email) == len(train_label)
+  assert len(valid_email) == len(valid_label)
+  print("Training data distribution is {}".format(Counter(train_label)))
+  print("Valid data distribution is {}".format(Counter(valid_label)))
+  return train_email, train_label, valid_email, valid_label
 
 
 if __name__ == '__main__':
 
-  # 'jan_' | 'dec_' | 'json_train_' | 'json_valid_'
-  prefix = 'json_valid_'
-  data_dir = 'org_array_data'
-  save_dir = 'data_v1'
+  save_file_prefix = './processing_pipeline_exprmt_20200630/trytry/all_'  # all_org/all_noempty_
+  label_data = np.load(
+      'processing_pipeline_exprmt_20200630/all_org/all_intentions.npy',
+      allow_pickle=True)
+  email_data = np.load(
+      'processing_pipeline_exprmt_20200630/all_org/all_bodies.npy',
+      allow_pickle=True)
 
-  label_file_name = prefix + 'intentions.npy'
-  la = LabelArray(data_dir, label_file_name, prefix)
-  la.removeEmpty(save_dir)
-  la.processLabel(save_dir)
+  la = LabelArray(label_data)
+  idx_l = la.processLable()
 
-  email_file_name = prefix + 'bodies.npy'
-  ea = EmailArray(data_dir, save_dir, email_file_name, prefix)
-  ea.cleanByLabelIndex()
-  ea.parseRawMessage()
+  ea = EmailArray(email_data)
+  idx_e = ea.preprocessEmail()
 
-  cleanByEmailIndex(save_dir, prefix, la.labels_p, ea.empty_email_indexes,
-                    ea.emails_p)
+  indexes_to_remove = np.array(list(set(idx_l + idx_e)))
+
+  label_array, email_array = removeProblemIndexes(save_file_prefix, la.labels,
+                                                  ea.emails, indexes_to_remove)
+  label_array, email_array = filterByLabel(save_file_prefix,
+                                           label_array,
+                                           email_array,
+                                           labels=['update', 'new'])
+  split_data_path = './processing_pipeline_exprmt_20200630/trytry/'
+  train_email, train_label, valid_email, valid_label = balanceSplitDataset(
+      split_data_path, label_array, email_array)
