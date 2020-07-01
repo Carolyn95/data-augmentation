@@ -1,5 +1,6 @@
 """
-key difference is rfind and rindex
+key difference is rfind and max(loc for loc, val in enumerate(sig_clf_pred)
+                            if val == '__label__SIG')
 """
 import numpy as np
 import pdb
@@ -136,7 +137,7 @@ class DataProcessor():
       email_sents_body = removeGreeting(email_sents_body)
       length_ = len(email_sents_body)
       f = open("./data_v2/long_email_1000.txt", "a")
-      if length_ > 1000:  # 32 emails are removed
+      if length_ > 1000: 
         write_string = str(length_) + '\n'
         f.write(write_string)
         f.writelines(email_sents_body)
