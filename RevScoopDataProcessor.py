@@ -66,27 +66,18 @@ class RevScoopDataProcessor():
       email_sents = list(filter(None, [_.strip() for _ in email_sents]))
       return email_sents
 
-    def removeGreeting(lines):
-      greeting = []
-      for line in lines:
-        tokens = line.split()
-        t_list = [re.sub(r'[^\w\s]', ' ', t).strip() for t in tokens]
-        for t in t_list:
-          if t.lower() in self.greeting_word:
-            greeting.append(line)
-      if len(lines) > 1:
-        lines = [l for l in lines if l not in greeting]
-      return lines
-
     for i, email_text in enumerate(emails):
       try:
         email_text = re.sub('\S+@\S+', '__EMAILADDRESS__', email_text)
       except TypeError:
         remove_email_index.append(i)
         continue
-      email_text = email_text.replace(u'\xa0',
-                                      u' ').replace('&#8217;', '\'').replace(
-                                          '\\r\\n', '\n').replace('\u3000', '')
+      email_text = email_text.replace(u'\xa0', u' ').replace(
+          '&#8217;', '\'').replace('\\r\\n',
+                                   '\n').replace('\u3000',
+                                                 '').replace('\r\n', '\n')
+      start_of_conversation = email_text.find('\nFrom:')
+      email_text = email_text[:start_of_conversation]
       try:
         ending_word_index = re.findall(self.email_regex, email_text.lower())[-1]
         ending_word_index = email_text.lower().rfind(ending_word_index)
@@ -96,13 +87,12 @@ class RevScoopDataProcessor():
       email_sents = decomposeEmailToSentence(email_content)
       sig_clf_result = self.sig_model.predict(email_sents)[0]
       sig_clf_pred = [_[0] for _ in sig_clf_result]
-      try:
-        sig_start_idx = max(loc for loc, val in enumerate(sig_clf_pred)
-                            if val == '__label__SIG')
-      except ValueError:
-        sig_start_idx = len(sig_clf_pred)
+      sig_index = [
+          loc for loc, val in enumerate(sig_clf_pred) if val == '__label__SIG'
+      ]
+      sig_start_idx = max(sig_index) if len(sig_index) > 0 and max(
+          sig_index) != 0 else len(sig_clf_pred)
       email_sents_body = email_sents[:sig_start_idx]
-      email_sents_body = removeGreeting(email_sents_body)
       length_ = len(email_sents_body)
 
       if length_ > 1000:
