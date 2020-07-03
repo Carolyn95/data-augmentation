@@ -100,7 +100,7 @@ if __name__ == '__main__':
 
   # Step 3
   start_time = time.time()
-  prefix = 'scp_'  # 'KW_' | 'rev_scp_' | 'scp_'
+  prefix = 'rev_scp_'  # 'KW_' | 'rev_scp_' | 'scp_'
   input_path = Path(save_dir)
   train_sents_path = input_path / (prefix + 'train_email.npy')
   train_labels_path = input_path / (prefix + 'train_label.npy')
