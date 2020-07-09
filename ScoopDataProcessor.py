@@ -105,12 +105,16 @@ class ScoopDataProcessor():
       email_sents_body = removeGreeting(email_sents_body)
       length_ = len(email_sents_body)
 
-      if length_ > 28:  # 32 emails are removed
+      if length_ > 1000:  # 32 emails are removed
         count_long += 1
         remove_email_index.append(i)
       elif length_ == 0:
+        email_sents_body = ['__PROCESSEDEMPTY__']
+        print(i)
         count_empty += 1
-        remove_email_index.append(i)
+        # remove_email_index.append(i)
+        self.email_body_length.append(length_)
+        self.email_bodies.append(email_sents_body)
       else:
         self.email_body_length.append(length_)
         self.email_bodies.append(email_sents_body)
@@ -124,13 +128,15 @@ class ScoopDataProcessor():
 
     print(len(self.labels_p), len(self.email_bodies))
     assert len(self.labels_p) == len(self.email_bodies)
-    np.save(self.data_dir + 'scp_' + prefix + '_label.npy', self.labels_p)
-    np.save(self.data_dir + 'scp_' + prefix + '_email.npy', self.email_bodies)
+    np.save(self.data_dir + 'scp_keep_long_' + prefix + '_label.npy',
+            self.labels_p)
+    np.save(self.data_dir + 'scp_keep_long_' + prefix + '_email.npy',
+            self.email_bodies)
 
 
 if __name__ == '__main__':
   parent_dir = 'processing_pipeline_exprmt_20200630/'
-  serial_no = 'split_0/'
+  serial_no = 'split_3/'
   data_dir = parent_dir + serial_no
   train_label = np.load(data_dir + 'train_label.npy', allow_pickle=True)
   valid_label = np.load(data_dir + 'valid_label.npy', allow_pickle=True)
