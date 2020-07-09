@@ -41,6 +41,7 @@ import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # remove logging info
 import warnings
 warnings.filterwarnings('ignore')  # filter out warnings
+tf.random.set_random_seed(2020)
 
 
 class ModelDataReader():
@@ -116,8 +117,10 @@ class ModelDataReader():
       self.valid_sents = np.array(valid_sents)
 
   def onehotEncodingLabel(self, save_dir):
-    cats = list(set(np.concatenate((self.train_labels, self.valid_labels))))
+    cats = sorted(
+        list(set(np.concatenate((self.train_labels, self.valid_labels)))))
     label_to_int = dict((l, i) for i, l in enumerate(cats))
+    print(label_to_int)
     with open(save_dir / 'label_to_int.pkl', 'wb') as f:
       pkl.dump(label_to_int, f)
     int_train_labels = [label_to_int[l] for l in self.train_labels]
@@ -137,6 +140,7 @@ class ModelDataReader():
     self.onehot_valid_labels = np.array(self.onehot_valid_labels)
 
   def randomizeData(self, save_dir):
+    # set random seed, affect batch size
     p1 = np.random.permutation(len(self.onehot_train_labels))
     p2 = np.random.permutation(len(self.onehot_valid_labels))
 
@@ -222,13 +226,13 @@ class VanillaUSE():
                              verbose=1,
                              save_best_only=True,
                              mode='auto')  # ,save_freq="epoch"
+      print(self.train_x[:10], self.train_y[:10])
       hist = self.model.fit(self.train_x,
                             self.train_y,
                             validation_split=0.2,
                             epochs=20,
                             batch_size=128,
                             callbacks=[ckpt])
-      # print(hist)
       pred = self.model.predict(self.valid_x)
       self.pred = np.argmax(pred, axis=1)
       self.valid_y_ = np.argmax(self.valid_y, axis=1)

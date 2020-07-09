@@ -16,6 +16,12 @@ import pandas as pd
 from collections import Counter
 import pdb
 import time
+import random
+os.environ['PYTHONHASHSEED'] = str(2020)
+os.environ['TF_CUDNN_DETERMINISTIC'] = '1'
+# tf.reset_default_graph()
+random.seed(2020)
+np.random.seed(2020)
 from EmailDataFactory import filterByLabel, balanceSplitDataset
 from ScoopDataProcessor import ScoopDataProcessor
 from HistoryFinder import HistoryFinder
