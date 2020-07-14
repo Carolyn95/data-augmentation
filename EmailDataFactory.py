@@ -149,12 +149,12 @@ def balanceSplitDataset(split_data_path,
 
 if __name__ == '__main__':
 
-  save_file_prefix = './processing_pipeline_exprmt_20200630/trytry/all_'  # all_org/all_noempty_
+  save_file_prefix = './processing_pipeline_exprmt_20200630/json_exprmt/json_new_update'
   label_data = np.load(
-      'processing_pipeline_exprmt_20200630/all_org/all_intentions.npy',
+      'processing_pipeline_exprmt_20200630/json_exprmt/json_all_labels.npy',
       allow_pickle=True)
   email_data = np.load(
-      'processing_pipeline_exprmt_20200630/all_org/all_bodies.npy',
+      'processing_pipeline_exprmt_20200630/json_exprmt/json_all_bodies.npy',
       allow_pickle=True)
 
   la = LabelArray(label_data)
@@ -171,6 +171,6 @@ if __name__ == '__main__':
                                            label_array,
                                            email_array,
                                            labels=['update', 'new'])
-  split_data_path = './processing_pipeline_exprmt_20200630/trytry/'
+  split_data_path = './processing_pipeline_exprmt_20200630/json_exprmt/'
   train_email, train_label, valid_email, valid_label = balanceSplitDataset(
       split_data_path, label_array, email_array)

@@ -229,7 +229,7 @@ class VanillaUSE():
       print(self.train_x[:10], self.train_y[:10])
       hist = self.model.fit(self.train_x,
                             self.train_y,
-                            validation_split=0.2,
+                            validation_split=0.1,
                             epochs=20,
                             batch_size=128,
                             callbacks=[ckpt])
@@ -264,8 +264,8 @@ if __name__ == '__main__':
   # prefix = ''  # 'KW_' | 'rev_scp' | 'scp'
 
   parent_dir = 'processing_pipeline_exprmt_20200630/'
-  serial_no = 'split_4/'
-  prefix = 'scp_'  # 'KW_' | 'rev_scp_' | 'scp_'
+  serial_no = 'json_exprmt/'
+  prefix = 'rev_scp_'  # 'KW_' | 'rev_scp_' | 'scp_'
   save_dir = parent_dir + serial_no
   input_path = Path(parent_dir + serial_no)
 

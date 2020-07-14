@@ -83,7 +83,7 @@ class Classifier():
 
 if __name__ == '__main__':
   parent_dir = 'processing_pipeline_exprmt_20200630/'
-  serial_no = 'split_4/'
+  serial_no = 'json_exprmt/'
   data_dir = parent_dir + 'trytry/'
   save_dir = parent_dir + serial_no
 

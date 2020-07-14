@@ -121,7 +121,7 @@ class RevScoopDataProcessor():
 
 if __name__ == '__main__':
   parent_dir = 'processing_pipeline_exprmt_20200630/'
-  serial_no = 'split_0/'
+  serial_no = 'json_exprmt/'
   data_dir = parent_dir + serial_no
   train_label = np.load(data_dir + 'train_label.npy', allow_pickle=True)
   valid_label = np.load(data_dir + 'valid_label.npy', allow_pickle=True)
